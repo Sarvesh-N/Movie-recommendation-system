@@ -38,10 +38,7 @@ difflib
 1. Input matching is case-insensitive and ignores punctuation.
 
 2. Input must closely match an existing movie title in movies.pkl.
-## Demo
-
-Insert gif or link to demo
-
+   
 
 ## Sample output
 

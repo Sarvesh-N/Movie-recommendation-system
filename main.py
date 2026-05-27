@@ -42,7 +42,7 @@ movie_input = st.text_input("Enter the movie title")
 if st.button("Get Recommendation"):
 
     if movie_input is None:
-        st.warning("No input detected")
+        st.warning("No input detected !")
     if movie_input.strip() == "":
         st.warning("Enter the valid input")
     else:

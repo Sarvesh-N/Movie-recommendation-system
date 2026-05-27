@@ -22,6 +22,10 @@ jobs:
 
           - name: run the image in the container
             run: docker run -d -p 8501:8501 --name prod-container movie-rec-sys
+
+        #show logs
+          - name: show the container logs
+            run: docker logs prod-container
           
         #testing 
           - name: wait to load

@@ -1,0 +1,51 @@
+name: build-test-ml-app
+
+on:
+    push:
+        branches:
+          - main
+          - dev
+
+jobs:
+    build-test-runners:
+        runs-on:
+            self-hosted
+
+        # building 
+        steps:
+          - name: checkout repo
+            uses: actions/checkout@v4
+
+          - name: build image
+            run: docker build -t movie-rec-sys .
+
+          - name: run the image in the container
+            run: docker run -d -p 8501:8501 --name prod-container movie-rec-sys
+          
+        #testing 
+          - name: wait to load
+            run: sleep 5
+
+          - name: testing app live | not live 
+            run: | 
+              for i in {1..5};do
+                if curl http://localhost:8501; then
+                  echo app is alive
+                  exit 0
+                else
+                  echo app is down
+                  exit 1
+                fi
+              done
+              
+        #destroy resources
+          - name: destroy docker contaienr
+            if: always()
+            run: docker stop prod-container && docker rm prod-container
+        
+          - name: delete images
+            if : always()
+            run: docker image rm movie-rec-sys
+          
+                
+         

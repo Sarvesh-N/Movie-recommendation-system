@@ -1,0 +1,14 @@
+numpy
+pandas
+scikit-learn
+scipy
+nltk
+streamlit
+flask
+matplotlib
+seaborn
+joblib
+requests
+tmdbv3api
+beautifulsoup4
+python-dotenv

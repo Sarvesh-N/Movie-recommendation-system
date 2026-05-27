@@ -36,7 +36,7 @@ def recommend(movies_title):
     return finded_movies
 
 
-st.title("🎬 Movie Recommendation System")
+st.title("🎬 Movie Recommendation System.")
 
 movie_input = st.text_input("Enter the movie title")
 if st.button("Get Recommendation"):

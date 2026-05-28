@@ -17,6 +17,8 @@ jobs:
       # checkout repository
       - name: checkout repo
         uses: actions/checkout@v4
+        with: 
+          lfs: true
 
       # login to dockerhub
       - name: login to dockerhub

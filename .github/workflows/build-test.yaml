@@ -9,7 +9,7 @@ on:
 jobs:
     build-test-runners:
         runs-on:
-            self-hosted
+            ubuntu-latest
 
 
         # building 
@@ -19,6 +19,9 @@ jobs:
 
           - name: build image
             run: docker build -t movie-rec-sys . --progress=plain
+
+          - name: Tagging the application
+            run: docker tag movie-rec-sys sarvs99/movie-rec-sys:latest
 
           - name: run the image in the container
             run: docker run -d -p 8501:8501 --name prod-container movie-rec-sys
@@ -44,12 +47,12 @@ jobs:
               done
               
         #destroy resources
-          - name: destroy docker contaienr
+          - name: destroy docker container
             if: always()
             run: docker stop prod-container && docker rm prod-container
         
           - name: delete images
-            if : always()
+            if: always()
             run: docker image rm movie-rec-sys
           
                 

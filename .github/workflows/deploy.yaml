@@ -1,71 +1,95 @@
-name: deploy-ml-app
+name: deployment stage - ci pipeline passes
 
 on:
   workflow_run:
-    workflows: ["build-test-ml-app"]
-    types:
-      - completed
+    workflows: [build-test-ml-app]
+    types: completed
 
 jobs:
-  deploy:
-    # deploy only if CI workflow passed
+  deployment-stage:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+    
     runs-on: ubuntu-latest
-
     steps:
-      # checkout repository
       - name: checkout repo
         uses: actions/checkout@v4
         with: 
-          lfs: true
+          lfs: true  # using lfs because the pkl files are big in size
 
-      # login to dockerhub
-      - name: login to dockerhub
+      - name: login to docker hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
-      # build docker image
-      - name: build docker image
+      - name: build image
         run: docker build -t sarvs99/movie-rec-sys:latest .
 
-      # push image to dockerhub
-      - name: push docker image
+      - name:  push the image
         run: docker push sarvs99/movie-rec-sys:latest
 
-      # connect to server and deploy container
-      - name: deploy app on server
-        uses: appleboy/ssh-action@v1.0.3
+      # - name: log in to server and deploy
+      #   run: ssh -i ${{ secrets.SERVER_SSH_KEY }} ${{secrets.HOST_NAME}}@${{secrets.HOST_IP}}
+
+      # - name: pull the docker imge
+      #   run: docker pull sarvs99/movie-rec-sys:latest
+
+      # - name: stopping the old container
+      #   run: docker stop movie-rec-sys || true
+      
+      # - name: remove the old container
+      #   run: docker rm movie-rec-sys || true
+
+      # - name: build docker image
+      #   run: docker run -d -p 8501:8501 --restart always sarvs99/movie-rec-sys:latest
+
+      # - name: deployment message
+      #   run: echo "deployment successfull"
+
+      # - name: testing in the prod level
+      #   run: curl -f http://localhost:8501
+      
+      # - name: deploye
+      #   run: echo deployed successfully
+
+
+      - name: deployment process
+        uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{secrets.HOST_IP}}
+          username: ${{secrets.HOST_NAME}}
+          key: ${{secrets.SERVER_SSH_KEY}}
           script: |
-            echo "Pulling latest image..."
+            echo pulling image from sarvs99 hub
 
             docker pull sarvs99/movie-rec-sys:latest
 
-            echo "Stopping old container..."
+            echo done pulling image
 
+            echo stopping the old container
             docker stop movie-rec-container || true
             docker rm movie-rec-container || true
 
-            echo "Removing unused images..."
-
+            echo deleting images
             docker image prune -af
 
-            echo "Starting new container..."
+            echo running container with new image
+            docker run -d -p 8501:8501 --name movie-rec-container --restart always sarvs99/movie-rec-sys:latest
 
-            docker run -d \
-              --name movie-rec-container \
-              -p 8501:8501 \
-              --restart always \
-              sarvs99/movie-rec-sys:latest
+            echo deployment successfull
 
-            echo "Deployment completed successfully"
+            echo sample testing in the prod environment
+            sleep 10
+            curl http://localhost:8501
 
-      # deployment verification
-      - name: verify deployment
-        run: echo "Application deployed successfully"
+            echo app is ready to use !
+
+
+
+
+
+
+
+      
+
+      
